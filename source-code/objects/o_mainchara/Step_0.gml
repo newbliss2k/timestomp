@@ -13,6 +13,34 @@ sprite_set_bbox(sprite_index,xorigin-sprite_bbox_width/2,yorigin-sprite_bbox_hei
 
 // x movement
 
+on_ground=place_meeting(x, y + 1, o_solid)
+
+if ((place_meeting(x+1,y,o_solid)) & (keyboard_check(global.key.right)) & (on_ground=0)) {
+	slipping=1
+	if keyboard_check_pressed(global.key.up) {
+		x_speed-=x_slip_power
+		y_speed-=y_slip_power
+	}
+}
+else {
+	if (on_ground=0) || (!(place_meeting(x+1,y,o_solid))) {
+		slipping=0
+	}
+}
+
+if ((place_meeting(x-1,y,o_solid)) & (keyboard_check(global.key.left)) & (on_ground=0)) {
+	slipping=1
+	if keyboard_check_pressed(global.key.up) {
+		x_speed+=x_slip_power
+		y_speed-=y_slip_power
+	}
+}
+else {
+	if (on_ground=0) || (!(place_meeting(x-1,y,o_solid))) {
+		slipping=0
+	}
+}
+
 x_dir=keyboard_check(global.key.right)-keyboard_check(global.key.left)
 if !(x_dir=0) sprite_dir=x_dir
 
@@ -60,24 +88,25 @@ if y_speed>y_speed_max y_speed=y_speed_max
 
 on_ground=place_meeting(x, y + 1, o_solid)
 if on_ground {
-	coyot_timer=10
+	coyot_timer=coyot_time
 }
-
-
 
 // animations
 
 image_xscale=sprite_dir
 
+if slipping {
+	sprite_index=s_wallslip
+} else
 if on_ground {
-	if idle_to_run_complete {
+	/*if idle_to_run_complete {
 		sprite_index=s_mainchara_run
 		idle_to_run_complete=0
 	}
 	if run_to_idle_complete {
 		sprite_index=s_mainchara
 		run_to_idle_complete=0
-	}
+	}*/
 
 	if ((x_speed_incr=1) & !(sprite_index=s_mainchara_idle_to_run || sprite_index=s_mainchara_run)) {
 		sprite_index=s_mainchara_idle_to_run
@@ -88,12 +117,15 @@ if on_ground {
 	}
 
 	if ((sprite_index=s_mainchara_idle_to_run) & (image_index=3)) {
-		idle_to_run_complete=1
+		sprite_index=s_mainchara_run
 	}
 	if ((sprite_index=s_mainchara_run_to_idle) & (image_index=4)) {
-		run_to_idle_complete=1
+		sprite_index=s_mainchara
 	}
 } else {
 	if y_speed>0 sprite_index=s_mainchara_jump
 	if y_speed<0 sprite_index=s_mainchara_fall
 }
+
+// cursor
+

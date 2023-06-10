@@ -18,6 +18,10 @@ jump_impulse=-5
 
 on_ground=0
 coyot_timer=0
+coyot_time=10
+
+x_slip_power=6
+y_slip_power=6
 
 xorigin=sprite_get_xoffset(sprite_index)
 yorigin=sprite_get_yoffset(sprite_index)
