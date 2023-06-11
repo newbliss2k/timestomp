@@ -13,45 +13,48 @@ sprite_set_bbox(sprite_index,xorigin-sprite_bbox_width/2,yorigin-sprite_bbox_hei
 
 // x movement
 
-on_ground=place_meeting(x, y + 1, o_solid)
-
-if ((place_meeting(x+1,y,o_solid)) & (keyboard_check(global.key.right)) & (on_ground=0)) {
-	slipping=1
-	if keyboard_check_pressed(global.key.up) {
-		x_speed-=x_slip_power
-		y_speed-=y_slip_power
-	}
-}
-else {
-	if (on_ground=0) || (!(place_meeting(x+1,y,o_solid))) {
-		slipping=0
-	}
-}
-
-if ((place_meeting(x-1,y,o_solid)) & (keyboard_check(global.key.left)) & (on_ground=0)) {
-	slipping=1
-	if keyboard_check_pressed(global.key.up) {
-		x_speed+=x_slip_power
-		y_speed-=y_slip_power
-	}
-}
-else {
-	if (on_ground=0) || (!(place_meeting(x-1,y,o_solid))) {
-		slipping=0
-	}
-}
-
 x_dir=keyboard_check(global.key.right)-keyboard_check(global.key.left)
 if !(x_dir=0) sprite_dir=x_dir
 
-if abs(x_speed)<x_speed_max {
-	x_speed=lerp(x_speed,x_speed_max*x_dir,x_velocity/4)
-	x_speed_incr=1
+on_ground=place_meeting(x, y + 1, o_solid)
+
+if slipping_coyot_timer<1 slipping=0
+if ((place_meeting(x+x_dir,y,o_solid)) & (keyboard_check(global.key.right)) & (on_ground=0)) {
+	slipping=-x_dir
+} else if !((place_meeting(x+1,y,o_solid)) || (place_meeting(x-1,y,o_solid))) {
+	slipping_coyot_timer=slipping_coyot_time
+}
+slipping_coyot_timer--
+
+
+if ((!(slipping=0)) & (keyboard_check_pressed(global.key.up))) {
+	x_speed=x_slip_power*slipping
+	y_speed=-y_slip_power
 }
 
-if x_dir=0 {
-	x_speed=lerp(x_speed,0,x_velocity/4)
+switch x_dir {
+	case 0:
+	x_speed=lerp(x_speed,0,x_velocity/8)
 	x_speed_incr=0
+	break;
+	
+	case 1:
+	if x_speed<x_speed_max {
+		if x_speed<0 {
+			x_speed=lerp(x_speed,x_speed_max*x_dir,x_velocity/8)
+		} else x_speed=lerp(x_speed,x_speed_max*x_dir,x_velocity/4)
+		x_speed_incr=1
+	}
+	break;
+	
+	case -1:
+	if x_speed>-x_speed_max {
+	if x_speed>0 {
+			x_speed=lerp(x_speed,x_speed_max*x_dir,x_velocity/8)
+		} else x_speed=lerp(x_speed,x_speed_max*x_dir,x_velocity/4)
+		x_speed_incr=1
+	}
+	break;
 }
 
 if (!place_meeting(x + x_speed, y, o_solid)) {
@@ -95,7 +98,7 @@ if on_ground {
 
 image_xscale=sprite_dir
 
-if slipping {
+if !(slipping=0) {
 	sprite_index=s_wallslip
 } else
 if on_ground {
@@ -127,5 +130,15 @@ if on_ground {
 	if y_speed<0 sprite_index=s_mainchara_fall
 }
 
-// cursor
+// attack
 
+if attack_timer<1 {
+	if mouse_check_button_pressed(mb_left) {
+		attack_dir=point_direction(x,y-10,mouse_x,mouse_y)
+		x_speed+=attack_speed*dcos(attack_dir)
+		y_speed-=attack_speed*dsin(attack_dir)
+		instance_create_depth(x,y-10,-1,o_slash)
+		
+	}
+	
+}

@@ -20,8 +20,16 @@ on_ground=0
 coyot_timer=0
 coyot_time=10
 
+slipping=0
 x_slip_power=6
 y_slip_power=6
+slipping_coyot_timer=0
+slipping_coyot_time=3
+
+attack_timer=0
+attack_time=10
+attack_dir=0
+attack_speed=10
 
 xorigin=sprite_get_xoffset(sprite_index)
 yorigin=sprite_get_yoffset(sprite_index)
